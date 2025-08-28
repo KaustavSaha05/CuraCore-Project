@@ -11,11 +11,13 @@ const containerStyle = {
   height: '100%'
 };
 
-// Default to Kolkata, India
+// Default center for the map (Kolkata, India)
 const defaultCenter = {
   lat: 22.5726,
   lng: 88.3639
 };
+
+const libraries = ['places'];
 
 const FindFacilitiesPage = ({ onNavigate }) => {
   const [userLocation, setUserLocation] = useState(null);
@@ -24,13 +26,19 @@ const FindFacilitiesPage = ({ onNavigate }) => {
   const [error, setError] = useState('');
   const [map, setMap] = useState(null);
 
+  // --- ADD THIS LINE FOR DEBUGGING ---
+  console.log("Key being used by map:", import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
+  // ------------------------------------
+
+  // This hook loads the Google Maps script
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ['places']
+    libraries: libraries
   });
 
   const handleFind = () => {
+    if (!map) return;
     setIsLoading(true);
     setError('');
     setFacilities([]);
@@ -41,6 +49,7 @@ const FindFacilitiesPage = ({ onNavigate }) => {
       return;
     }
 
+    // Get the user's current location
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const location = {
@@ -48,14 +57,17 @@ const FindFacilitiesPage = ({ onNavigate }) => {
           lng: position.coords.longitude,
         };
         setUserLocation(location);
+        map.panTo(location); // Move the map to the user's location
+        map.setZoom(14);
 
         const service = new window.google.maps.places.PlacesService(map);
         const request = {
           location: location,
-          radius: '5000',
+          radius: '5000', // 5km radius
           type: ['hospital', 'pharmacy', 'doctor'],
         };
 
+        // Search for nearby places
         service.nearbySearch(request, (results, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
             setFacilities(results);
@@ -92,10 +104,11 @@ const FindFacilitiesPage = ({ onNavigate }) => {
             {isLoaded && (
               <GoogleMap
                 mapContainerStyle={containerStyle}
-                center={userLocation || defaultCenter}
-                zoom={14}
+                center={defaultCenter}
+                zoom={12}
                 onLoad={mapInstance => setMap(mapInstance)}
               >
+                {/* Add markers for the user and the found facilities */}
                 {userLocation && <Marker position={userLocation} title="Your Location" />}
                 {facilities.map((place, i) => (
                   <Marker key={i} position={place.geometry.location} title={place.name} />

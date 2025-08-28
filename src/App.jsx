@@ -8,7 +8,7 @@ import HomePage from './pages/HomePage.jsx';
 import BasicHealthPage from './pages/BasicHealthPage.jsx';
 import ReportAnalyzerPage from './pages/ReportAnalyzerPage.jsx';
 import ChatbotPage from './pages/ChatbotPage.jsx';
-import FindingFacilitiesPage from './pages/FindingFacilitiesPage.jsx';
+import FindFacilitiesPage from './pages/FindFacilitiesPage.jsx';
 import { Login } from './components/auth/Login.jsx';
 import { Signup } from './components/auth/Signup.jsx';
 
